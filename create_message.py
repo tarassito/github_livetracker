@@ -19,7 +19,7 @@ def map_to_msg(event):
 
 def process(source_of_msg: Observable[dict[str, str]]) -> Observable[Message]:
     return source_of_msg.pipe(
-        ops.map(lambda x: (x["items"])),
+        ops.map(lambda x: (x.get("items"))),
         ops.flat_map(lambda x: reactivex.from_list(x)),
         ops.distinct(),
         ops.map(lambda x: map_to_msg(x))
