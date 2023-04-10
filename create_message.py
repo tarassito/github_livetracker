@@ -9,6 +9,11 @@ class Message:
     repo_name: str
     updated_time: str
     language: str
+    new: bool = None
+
+    def is_new(self, value: bool):
+        self.new = value
+        return self
 
 
 def map_to_msg(event):

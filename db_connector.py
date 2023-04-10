@@ -39,6 +39,11 @@ def store_msg(c: Connection, msg: Message):
     c.commit()
 
 
+def is_new(c: Connection, msg: Message) -> bool:
+    sql_string = f"SELECT 1 FROM github_messages WHERE repository_name = '{msg.repo_name}'"
+    return False if c.execute(sql_string).fetchone() else True
+
+
 def save(source: Observable[Message]) -> Observable[None]:
     return (connection_observable.pipe(
         execute(
@@ -52,3 +57,12 @@ def save(source: Observable[Message]) -> Observable[None]:
                                         ops.map(lambda msg: store_msg(connect, msg)))),
         ops.ignore_elements()
     ))
+
+
+def check_if_new_repo(source: Observable[Message]) -> Observable:
+    return connection_observable.pipe(
+        ops.flat_map(
+            lambda connect: source.pipe(ops.observe_on(scheduler),
+                                        ops.map(lambda msg: msg.is_new(is_new(connect, msg))))
+        )
+    )
